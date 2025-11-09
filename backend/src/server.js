@@ -16,7 +16,7 @@ app.get('/about', (req,res)=>{
     })
 })
 
-app.get('contact', (req,res)=>{
+app.get('/contact', (req,res)=>{
     res.status(200).json({
         "description": "This is the contacts page."
     })
@@ -30,7 +30,7 @@ if(ENV.NODE_ENV === 'production'){
     })
 }
 
-app.listen(3000, ()=>{
+app.listen(ENV.PORT, ()=>{
     console.log('Server is running on Port ', ENV.PORT)
 })
 
