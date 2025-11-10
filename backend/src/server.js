@@ -38,5 +38,4 @@ const startServer = async() => {
         console.error(`Error: ${err.message}`)
     }
 }
-
 startServer()
