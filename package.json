@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/Harsh-150/Interview-Platform-Project/issues"
   },
-  "homepage": "https://github.com/Harsh-150/Interview-Platform-Project#readme"
+  "homepage": "https://github.com/Harsh-150/Interview-Platform-Project#readme",
+  "dependencies": {
+    "mongodb": "^7.0.0"
+  }
 }
