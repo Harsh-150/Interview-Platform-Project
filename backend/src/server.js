@@ -17,7 +17,7 @@ app.use(cors({
     credentials: true// means server allows browser(frontend) to send cookies to it
 }))
 
-app.use('/api/inngest', serve(inngest, {functions}))
+app.use('/api/inngest', serve({ client: inngest, functions }))
 
 app.get('/about', (req,res)=>{
     res.status(200).json({
