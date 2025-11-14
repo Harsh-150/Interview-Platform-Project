@@ -4,8 +4,7 @@ import {ENV} from '../env.js'
 import {connectDB} from './lib/db.js'
 import cors from 'cors'
 import {serve} from 'inngest/express'
-import {inngest} from './lib/inngest.js'
-import {functions}  from './lib/inngest.js'
+import {inngest, functions} from './lib/inngest.js'
 
 const app = express()
 const __dirname = path.resolve()
@@ -18,7 +17,7 @@ app.use(cors({
     credentials: true// means server allows browser(frontend) to send cookies to it
 }))
 
-app.use('/api/inngest', serve({client: inngest, functions}))
+app.use('/api/inngest', serve(inngest, {functions}))
 
 app.get('/about', (req,res)=>{
     res.status(200).json({
