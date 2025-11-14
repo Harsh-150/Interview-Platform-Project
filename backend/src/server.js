@@ -1,60 +1,53 @@
 import express from 'express'
-import path from 'path'
 import {ENV} from '../env.js'
-import {connectDB} from './lib/db.js'
+import {connectDB} from './lib/db.js' // <-- RE-ADD THIS
 import cors from 'cors'
 import {serve} from 'inngest/express'
 import {inngest, functions} from './lib/inngest.js'
 
 const app = express()
-const __dirname = path.resolve()
 
 // middleware
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cors({
     origin: ENV.CLIENT_URL,
-    credentials: true// means server allows browser(frontend) to send cookies to it
+    credentials: true
 }))
 
+// --- API ROUTES ---
 app.use('/api/inngest', serve({ client: inngest, functions }))
 
-app.get('/about', (req,res)=>{
+app.get('/api/about', (req,res)=>{
     res.status(200).json({
         "description": "This is the about page."
     })
 })
 
-app.get('/contact', (req,res)=>{
+app.get('/api/contact', (req,res)=>{
     res.status(200).json({
         "description": "This is the contacts page."
     })
 })
 
-app.get('/{*any}', (req,res)=>{
-    res.status(200).json({
-        'description': "This is the default page."
-    })
-})
+// This export is what Vercel uses
+export default app;
 
-// make ready for deployment
-if(ENV.NODE_ENV === 'production'){
-    app.use(express.static(path.join(__dirname, '../frontend/dist')))
-    app.get('/{*any}', (req,res)=>{
-        res.sendFile(path.join(__dirname, '../frontend/dist/index.html'))
-    })
-}
-
-
+// --- LOCAL DEVELOPMENT STARTUP ---
+// This block will only run if NOT in production
 const startServer = async() => {
     try{
         await connectDB()
         app.listen(ENV.PORT, ()=>{
-            console.log('Server is running on Port ', ENV.PORT)
+            console.log(`[nodemon] Server is running on Port ${ENV.PORT}`)
         })
     }
     catch(err){
         console.error(`Error: ${err.message}`)
     }
 }
-startServer()
+
+// Only run the server locally
+if (ENV.NODE_ENV !== 'production') {
+    startServer()
+}
