@@ -1,6 +1,6 @@
 import express from 'express'
 import {ENV} from '../env.js'
-import {connectDB} from './lib/db.js' // <-- RE-ADD THIS
+import {connectDB} from './lib/db.js'
 import cors from 'cors'
 import {serve} from 'inngest/express'
 import {inngest, functions} from './lib/inngest.js'
