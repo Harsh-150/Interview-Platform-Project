@@ -4,6 +4,9 @@ import {connectDB} from './lib/db.js'
 import cors from 'cors'
 import {serve} from 'inngest/express'
 import {inngest, functions} from './lib/inngest.js'
+import {clerkMiddleware} from '@clerk/express'
+import { protectRoute } from './middleware/protectRoute.js'
+import chatRoutes from './routes/chatRoutes.js'
 
 const app = express()
 
@@ -14,19 +17,25 @@ app.use(cors({
     origin: ENV.CLIENT_URL,
     credentials: true
 }))
+app.use(clerkMiddleware()) // this adds auth field to request object: req.auth()
 
 // --- API ROUTES ---
 app.use('/api/inngest', serve({ client: inngest, functions }))
+app.use('/api/chat',chatRoutes)
 
-app.get('/api/about', (req,res)=>{
+app.get('/api/about', (req,res)=>{  
     res.status(200).json({
         "description": "This is the about page."
     })
 })
 
-app.get('/api/contact', (req,res)=>{
+// video-call feature should only be accessible to authenticated user,
+// that is why protectRoute is being used as middleware.
+// when array of middlewares is passed to express, it automatically flattens
+// and executes them sequentially, one by one. 
+app.get('/api/video-calls', protectRoute, (req,res)=>{
     res.status(200).json({
-        "description": "This is the contacts page."
+        'description': "Video-call endpoint. Only authenticated users can access"
     })
 })
 
