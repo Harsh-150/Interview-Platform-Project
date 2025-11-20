@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage";
 import ProblemsPage from "./pages/ProblemsPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProblemPage from "./pages/ProblemPage.jsx";
+import SessionPage from "./pages/SessionPage.jsx";
 import { useUser } from "@clerk/clerk-react";
 import { Toaster } from "react-hot-toast";
 import { QueryClient } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ function App() {
   const { isSignedIn, isLoaded } = useUser();
 
   // this will get rid of the flickering effect
-  if(!isLoaded) return null;
+  if (!isLoaded) return null;
 
   return (
     <>
@@ -33,6 +34,10 @@ function App() {
         <Route
           path="/problem/:id"
           element={isSignedIn ? <ProblemPage /> : <Navigate to={"/"} />}
+        />
+        <Route
+          path="/session/:id"
+          element={isSignedIn ? <SessionPage /> : <Navigate to={"/"} />}
         />
       </Routes>
 
