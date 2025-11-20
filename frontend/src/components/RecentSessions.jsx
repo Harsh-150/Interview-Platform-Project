@@ -3,6 +3,20 @@ import { getDifficultyBadgeClass } from "../lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
 function RecentSessions({ sessions, isLoading }) {
+  
+  // Helper function to safely format dates
+  const safeFormatDate = (dateString) => {
+    if (!dateString) return "Time unknown";
+    try {
+      const date = new Date(dateString);
+      // Check if the date is invalid (e.g. "Invalid Date")
+      if (isNaN(date.getTime())) return "Invalid date";
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      return "Time unknown";
+    }
+  };
+
   return (
     <div className="card bg-base-100 border-2 border-accent/20 hover:border-accent/30 mt-8">
       <div className="card-body">
@@ -18,7 +32,7 @@ function RecentSessions({ sessions, isLoading }) {
             <div className="col-span-full flex items-center justify-center py-20">
               <Loader className="w-10 h-10 animate-spin text-primary" />
             </div>
-          ) : sessions.length > 0 ? (
+          ) : sessions && sessions.length > 0 ? (
             sessions.map((session) => (
               <div
                 key={session._id}
@@ -49,9 +63,13 @@ function RecentSessions({ sessions, isLoading }) {
                       <Code2 className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-base mb-1 truncate">{session.problem}</h3>
+                      <h3 className="font-bold text-base mb-1 truncate">
+                        {session.problem || "Unknown Problem"}
+                      </h3>
                       <span
-                        className={`badge badge-sm ${getDifficultyBadgeClass(session.difficulty)}`}
+                        className={`badge badge-sm ${getDifficultyBadgeClass(
+                          session.difficulty
+                        )}`}
                       >
                         {session.difficulty}
                       </span>
@@ -62,9 +80,8 @@ function RecentSessions({ sessions, isLoading }) {
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4" />
                       <span>
-                        {formatDistanceToNow(new Date(session.createdAt), {
-                          addSuffix: true,
-                        })}
+                        {/* USING THE SAFE HELPER HERE */}
+                        {safeFormatDate(session.createdAt)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -77,9 +94,14 @@ function RecentSessions({ sessions, isLoading }) {
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-base-300">
-                    <span className="text-xs font-semibold opacity-80 uppercase">Completed</span>
+                    <span className="text-xs font-semibold opacity-80 uppercase">
+                      Completed
+                    </span>
                     <span className="text-xs opacity-40">
-                      {new Date(session.updatedAt).toLocaleDateString()}
+                      {/* Added safety check here too */}
+                      {session.updatedAt
+                        ? new Date(session.updatedAt).toLocaleDateString()
+                        : "N/A"}
                     </span>
                   </div>
                 </div>
@@ -90,8 +112,12 @@ function RecentSessions({ sessions, isLoading }) {
               <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-accent/20 to-secondary/20 rounded-3xl flex items-center justify-center">
                 <Trophy className="w-10 h-10 text-accent/50" />
               </div>
-              <p className="text-lg font-semibold opacity-70 mb-1">No sessions yet</p>
-              <p className="text-sm opacity-50">Start your coding journey today!</p>
+              <p className="text-lg font-semibold opacity-70 mb-1">
+                No sessions yet
+              </p>
+              <p className="text-sm opacity-50">
+                Start your coding journey today!
+              </p>
             </div>
           )}
         </div>

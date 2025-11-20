@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
+import { useJoinSession, useSessionById } from "../hooks/useSessions"; // Removed useEndSession
 import { PROBLEMS } from "../data/problems";
 import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
@@ -21,17 +21,26 @@ function SessionPage() {
   const { user } = useUser();
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [isEnding, setIsEnding] = useState(false); // Local state for button loading
 
   const { data: sessionData, isLoading: loadingSession, refetch } = useSessionById(id);
 
   const joinSessionMutation = useJoinSession();
-  const endSessionMutation = useEndSession();
+  
+  // Note: We removed endSessionMutation because useStreamClient now handles this.
 
   const session = sessionData?.session;
   const isHost = session?.host?.clerkId === user?.id;
   const isParticipant = session?.participant?.clerkId === user?.id;
 
-  const { call, channel, chatClient, isInitializingCall, streamClient } = useStreamClient(
+  const { 
+    call, 
+    channel, 
+    chatClient, 
+    isInitializingCall, 
+    streamClient, 
+    endSession // <--- IMPORTED FROM HOOK
+  } = useStreamClient(
     session,
     loadingSession,
     isHost,
@@ -43,7 +52,7 @@ function SessionPage() {
     ? Object.values(PROBLEMS).find((p) => p.title === session.problem)
     : null;
 
-  const [selectedLanguage, setSelectedLanguage] = useState("javascript");
+  const [selectedLanguage, setSelectedLanguage] = useState("cpp");
   const [code, setCode] = useState(problemData?.starterCode?.[selectedLanguage] || "");
 
   // auto-join session if user is not already a participant and not the host
@@ -88,10 +97,14 @@ function SessionPage() {
     setIsRunning(false);
   };
 
-  const handleEndSession = () => {
+  // --- UPDATED HANDLER ---
+  const handleEndSession = async () => {
     if (confirm("Are you sure you want to end this session? All participants will be notified.")) {
-      // this will navigate the HOST to dashboard
-      endSessionMutation.mutate(id, { onSuccess: () => navigate("/dashboard") });
+      setIsEnding(true);
+      // Call the function from the hook. 
+      // It handles: stopping call, updating DB, and navigating to dashboard.
+      await endSession();
+      setIsEnding(false); 
     }
   };
 
@@ -132,13 +145,14 @@ function SessionPage() {
                           {session?.difficulty.slice(0, 1).toUpperCase() +
                             session?.difficulty.slice(1) || "Easy"}
                         </span>
+                        
                         {isHost && session?.status === "active" && (
                           <button
                             onClick={handleEndSession}
-                            disabled={endSessionMutation.isPending}
+                            disabled={isEnding}
                             className="btn btn-error btn-sm gap-2"
                           >
-                            {endSessionMutation.isPending ? (
+                            {isEnding ? (
                               <Loader2Icon className="w-4 h-4 animate-spin" />
                             ) : (
                               <LogOutIcon className="w-4 h-4" />
@@ -146,6 +160,7 @@ function SessionPage() {
                             End Session
                           </button>
                         )}
+
                         {session?.status === "completed" && (
                           <span className="badge badge-ghost badge-lg">Completed</span>
                         )}
@@ -280,7 +295,13 @@ function SessionPage() {
                 <div className="h-full">
                   <StreamVideo client={streamClient}>
                     <StreamCall call={call}>
-                      <VideoCallUI chatClient={chatClient} channel={channel} />
+                      <VideoCallUI
+                        chatClient={chatClient}
+                        channel={channel}
+                        isHost={isHost}
+                        onEndCall={endSession}
+                        callInstance={call}
+                      />
                     </StreamCall>
                   </StreamVideo>
                 </div>
