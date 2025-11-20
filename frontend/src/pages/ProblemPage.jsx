@@ -42,8 +42,9 @@ const ProblemPage = () => {
     setOutput(null);
   };
 
-  const handleProblemChange = (newProblemId) =>
+  const handleProblemChange = (newProblemId) => {
     navigate(`/problem/${newProblemId}`);
+  }
 
   const triggerConfetti = () => {
     confetti({
