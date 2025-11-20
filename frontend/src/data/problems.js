@@ -1072,17 +1072,17 @@ class Solution {
 export const LANGUAGE_CONFIG = {
   cpp: {
     name: "C++",
-    icon: "../../public/cpp_icon.png",
+    icon: "/cpp_icon.png",
     monacoLang: "cpp",
   },
   java: {
     name: "Java",
-    icon: "../../public/java_icon.png",
+    icon: "/java_icon.png",
     monacoLang: "java",
   },
   python: {
     name: "Python",
-    icon: "../../public/python_icon.png",
+    icon: "/python_icon.png",
     monacoLang: "python",
   },
 };
